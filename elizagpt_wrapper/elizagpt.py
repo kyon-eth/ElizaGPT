@@ -18,6 +18,9 @@ else:
 from playwright.sync_api import sync_playwright
 from rich.console import Console
 from rich.markdown import Markdown
+from rich.text import Text
+from rich.align import Align
+from rich.padding import Padding
 
 console = Console()
 
@@ -236,14 +239,14 @@ class GPTShell(cmd.Cmd):
     """
 
     # overrides
-    intro = "Provide a prompt for ChatGPT, or type help or ? to list commands."
+    intro = "Ask me a question, or type help or ? to list commands.\n"
     prompt = "> "
 
     # our stuff
     prompt_number = 0
     chatgpt = None
     message_map = {}
-    stream = False
+    stream = True
 
     def _set_chatgpt(self, chatgpt):
         self.chatgpt = chatgpt
@@ -261,7 +264,7 @@ class GPTShell(cmd.Cmd):
         self._set_prompt()
 
     def _print_markdown(self, output):
-        console.print(Markdown(output))
+        console.print(Markdown(output, justify="left"))
         print("")
 
     def do_stream(self, _):
@@ -349,6 +352,33 @@ def main():
 
     chatgpt = ChatGPT(headless=not install_mode)
 
+    # if len(sys.argv) > 1 and not install_mode:
+    if not install_mode:
+        eliza_prompt = 'Im going to ask you a few questions. Please simulate responses to my questions as Eliza the Rogerian psychotherapist.'
+        
+        console.print('Loading...')
+        response = chatgpt.ask(eliza_prompt)
+        
+        text = Text()
+        text.append("\n\nWelcome to\n")
+        
+        text.append(r"""
+███████╗██╗     ██╗███████╗ █████╗ 
+██╔════╝██║     ██║╚══███╔╝██╔══██╗
+█████╗  ██║     ██║  ███╔╝ ███████║
+██╔══╝  ██║     ██║ ███╔╝  ██╔══██║
+███████╗███████╗██║███████╗██║  ██║
+╚══════╝╚══════╝╚═╝╚══════╝╚═╝  ╚═╝
+
+Powered by OpenAI's ChatGPT
+v0.1
+                    
+                    """, style="bold magenta")
+        console.print(text)
+        console.print(Markdown("Eliza is a *mock Rogerian psychotherapist*."))
+        console.print("\nThe original program was described by Joseph Welzenbaum in 1966.\n")
+        console.print("This is a simulation born out of ❤️  by http://twitter.com/0xKyon\n\n")
+    
     if len(sys.argv) > 1 and not install_mode:
         response = chatgpt.ask(" ".join(sys.argv[1:]))
         console.print(Markdown(response))
